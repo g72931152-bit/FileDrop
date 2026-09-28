@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111d">
+  <meta name="description" content="FileDrop — temporary file sharing with controlled delivery.">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/styles.css">
+  <title>FileDrop</title>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    <div class="grid-noise"></div><div class="scan-line"></div>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" id="brandLogo" href="/" aria-label="FileDrop home">
+      <span class="brand-logo"><img id="brandLogoImage" src="/assets/filedrop-logo.png" alt=""></span>
+      <span class="brand-text"><strong>FileDrop</strong><small id="brandVersion">v1 (0.10)</small></span>
+    </a>
+    <nav class="top-nav" aria-label="Primary">
+      <button class="nav-btn active" data-view="home">Share</button>
+      <button class="nav-btn" data-view="history">History</button>
+      <button class="nav-btn" data-view="people">People</button>
+      <button class="nav-btn" data-view="settings">Settings</button>
+    </nav>
+    <button class="profile-trigger" id="profileTrigger" type="button" aria-label="Open profile">
+      <img id="headerAvatar" src="/assets/filedrop-logo.png" alt="">
+      <span id="onlineDot"></span>
+    </button>
+  </header>
+
+  <main class="page-shell">
+    <section id="homeView" class="page-view active">
+      <section class="hero-banner reveal">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> Temporary file sharing</div>
+          <h1 id="heroTitle">Send a file.<br><em>Keep control.</em></h1>
+          <p>One link, clear rules. Share without an account, or send directly to someone who is online.</p>
+          <div class="hero-chips">
+            <span>Up to 2 GB</span><i></i><span>Local profile</span><i></i><span>No trackers</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-ring ring-a"></div><div class="art-ring ring-b"></div>
+          <img src="/assets/filedrop-logo.png" alt="">
+          <span class="art-caption">FILEDROP / SECURE TRANSFER</span>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel upload-panel reveal delay-1">
+          <div class="panel-head">
+            <div><span class="section-label">01 / FILE</span><h2>Choose what to send</h2></div>
+            <span class="panel-state" id="uploadState">Ready</span>
+          </div>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a file">
+            <input id="fileInput" type="file" hidden>
+            <div class="drop-icon"><span>↑</span></div>
+            <div class="drop-title">Drop a file here</div>
+            <div class="drop-sub">or <u>browse your device</u></div>
+            <div class="drop-limit">Maximum file size · 2 GB</div>
+          </div>
+
+          <div class="file-preview hidden" id="filePreview">
+            <div class="file-symbol">FILE</div>
+            <div class="file-meta"><strong id="fileName">—</strong><span id="fileSize">—</span></div>
+            <button class="ghost-icon" id="removeFile" type="button" aria-label="Remove selected file">×</button>
+          </div>
+
+          <div class="security-strip">
+            <div class="security-mark">✓</div>
+            <div><strong>Security preflight</strong><span id="securityState">SHA-256 check will run before the share is released.</span></div>
+          </div>
+        </article>
+
+        <aside class="panel settings-panel reveal delay-2">
+          <div class="panel-head">
+            <div><span class="section-label">02 / RULES</span><h2>Delivery settings</h2></div>
+            <button class="mini-reset" id="resetSettings" type="button">Reset</button>
+          </div>
+
+          <div class="settings-list">
+            <label class="setting-row"><span><strong>Expiration</strong><small>When this link stops working.</small></span>
+              <select id="expirySelect"><option value="900000">15 minutes</option><option value="3600000" selected>1 hour</option><option value="21600000">6 hours</option><option value="86400000">24 hours</option><option value="604800000">7 days</option><option value="null">Never</option></select>
+            </label>
+            <label class="setting-row"><span><strong>Downloads</strong><small>How many successful downloads are allowed.</small></span>
+              <select id="downloadsSelect"><option value="1">1</option><option value="5" selected>5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="custom">Custom</option><option value="unlimited">Unlimited</option></select>
+            </label>
+            <div id="customDownloadsWrap" class="inline-field hidden"><label>Custom limit<input id="customDownloads" inputmode="numeric" type="number" min="1" max="10000" placeholder="e.g. 250"></label><small>1–10,000 downloads</small></div>
+            <label class="setting-row switch-row"><span><strong>Password</strong><small>Require a password before download.</small></span><input id="passwordEnabled" type="checkbox"><i class="switch"></i></label>
+            <div id="passwordWrap" class="inline-field hidden"><label>Download password<input id="passwordInput" type="password" minlength="4" maxlength="128" autocomplete="new-password" placeholder="Minimum 4 characters"></label></div>
+            <label class="setting-row switch-row"><span><strong>Delete after first download</strong><small>Remove the share after one successful download.</small></span><input id="deleteAfterDownload" type="checkbox"><i class="switch"></i></label>
+          </div>
+
+          <div class="share-actions">
+            <button class="primary-btn" id="uploadBtn" type="button"><span>Generate share link</span><b>→</b></button>
+            <div class="small-note">By sharing, you confirm you have the right to distribute the file.</div>
+          </div>
+        </aside>
+      </section>
+
+      <div id="resultMount"></div>
+
+      <section class="feature-strip reveal delay-3">
+        <div><span>Private by default</span><small>No advertising SDKs or analytics are bundled.</small></div>
+        <div><span>Controlled delivery</span><small>Set expiration, password and download limits.</small></div>
+        <div><span>Human handoff</span><small>Drop a share directly into another local profile.</small></div>
+      </section>
+    </section>
+
+    <section id="historyView" class="page-view">
+      <div class="page-heading"><div><span class="section-label">03 / MEMORY</span><h2>Your history</h2><p>Saved locally in this browser. Files themselves are never copied into your history.</p></div><button id="clearHistory" class="ghost-btn" type="button">Clear history</button></div>
+      <div id="historyList" class="list-stack"></div>
+      <div id="historyEmpty" class="empty-state"><div class="empty-mark">01</div><h3>No saved activity</h3><p>Your generated shares and received drops will appear here.</p></div>
+    </section>
+
+    <section id="peopleView" class="page-view">
+      <div class="page-heading"><div><span class="section-label">04 / PEOPLE</span><h2>People</h2><p>Search local profiles that have recently connected to FileDrop.</p></div><span class="presence-note" id="presenceNote">Presence active</span></div>
+      <div class="people-toolbar"><label class="search-box"><span>⌕</span><input id="peopleSearch" placeholder="Search people…" maxlength="32"><kbd>/</kbd></label><button class="ghost-btn" id="refreshPeople" type="button">Refresh</button></div>
+      <div id="inboxMount"></div>
+      <div id="peopleList" class="people-list"></div>
+      <div id="peopleEmpty" class="empty-state"><div class="empty-mark">02</div><h3>No matching profiles</h3><p>Try another name or wait for someone to come online.</p></div>
+    </section>
+
+    <section id="settingsView" class="page-view">
+      <div class="page-heading"><div><span class="section-label">05 / PROFILE</span><h2>Personalize FileDrop</h2><p>Your profile is stored locally on this device.</p></div><span class="local-badge">Local account</span></div>
+      <div class="settings-layout">
+        <article class="panel profile-card">
+          <div class="profile-large"><img id="settingsAvatar" src="/assets/filedrop-logo.png" alt=""><div><strong id="settingsPreviewName">Guest</strong><span>Local profile</span></div></div>
+          <div class="field"><label>Display name<input id="profileName" maxlength="32" autocomplete="nickname" placeholder="Your name"></label></div>
+          <div class="field"><label>Profile photo<input id="avatarInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label><small>Images are resized locally before being stored in this browser.</small></div>
+          <label class="setting-row switch-row"><span><strong>Show me in People</strong><small>Allow your nickname and avatar to appear in search.</small></span><input id="profileVisible" type="checkbox"><i class="switch"></i></label>
+          <button id="saveProfile" class="primary-btn" type="button"><span>Save profile</span><b>✓</b></button>
+        </article>
+        <article class="panel preferences-card">
+          <div class="panel-head"><div><span class="section-label">PREFERENCES</span><h2>Interface</h2></div></div>
+          <label class="setting-row switch-row"><span><strong>Motion</strong><small>Keep the slow ambient movement and page transitions.</small></span><input id="motionToggle" type="checkbox" checked><i class="switch"></i></label>
+          <label class="setting-row switch-row"><span><strong>Compact layout</strong><small>Reduce spacing around panels and lists.</small></span><input id="compactToggle" type="checkbox"><i class="switch"></i></label>
+          <div class="accent-picker"><div><strong>Cold accent</strong><small>Choose the hue used for actions and focus rings.</small></div><div class="accent-options"><button type="button" data-accent="ice" class="accent-dot accent-ice active"></button><button type="button" data-accent="steel" class="accent-dot accent-steel"></button><button type="button" data-accent="polar" class="accent-dot accent-polar"></button></div></div>
+          <div class="version-box"><strong>FileDrop <span>v1 (0.10)</span></strong><p>Updated interface, local profiles, direct drops, richer expiry and download rules.</p><button id="showUpdates" class="text-btn" type="button">View release notes →</button></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="shareView" class="page-view">
+      <div id="shareLoading" class="share-state"><div class="spinner"></div><h2>Loading share</h2><p>Checking link status…</p></div>
+      <article id="shareCard" class="panel share-page-card hidden">
+        <div class="share-banner"><div class="share-banner-logo"><img id="shareOwnerAvatar" src="/assets/filedrop-logo.png" alt=""></div><div><span class="section-label">FILEDROP / DIRECT SHARE</span><strong id="shareOwnerName">Shared with you</strong></div><span class="share-secure">VERIFIED LINK</span></div>
+        <div class="share-file"><div class="file-symbol big">FILE</div><div><h2 id="shareFileName">—</h2><span id="shareFileInfo">—</span></div></div>
+        <div id="shareRisk" class="risk-box hidden"></div>
+        <div class="share-grid"><div><small>Expires</small><strong id="shareExpires">—</strong></div><div><small>Downloads</small><strong id="shareDownloads">—</strong></div><div><small>Protection</small><strong id="shareProtection">—</strong></div></div>
+        <div id="passwordGate" class="password-gate hidden"><label>Password<input id="sharePassword" type="password" placeholder="Enter download password"><button id="unlockBtn" class="primary-btn" type="button"><span>Unlock download</span><b>→</b></button><p id="passwordError"></p></label></div>
+        <div id="downloadPanel" class="download-panel"><a id="downloadBtn" class="primary-btn link-button" href="#"><span>Download file</span><b>↓</b></a><div class="virus-row"><span>Safety check: <strong id="shareVirusStatus">not scanned</strong></span><a id="virusTotalLink" href="#" target="_blank" rel="noopener noreferrer">Check on VirusTotal →</a></div><div class="download-warning">Downloads can contain harmful content. Treat files carefully and verify them with an antivirus or VirusTotal before opening.</div></div>
+        <a href="/" class="back-link">← Send a file with FileDrop</a>
+      </article>
+    </section>
+  </main>
+
+  <div id="incomingBar" class="incoming-bar hidden"><div class="incoming-avatar"><img id="incomingAvatar" src="/assets/filedrop-logo.png" alt=""></div><div><strong id="incomingTitle">New file dropped</strong><span id="incomingCopy">Someone sent you a file.</span></div><button id="incomingOpen" type="button">Open inbox</button><button id="incomingClose" type="button" aria-label="Dismiss">×</button></div>
+
+  <div id="profileMenu" class="profile-menu hidden"><div class="profile-menu-head"><img id="menuAvatar" src="/assets/filedrop-logo.png" alt=""><div><strong id="menuName">Guest</strong><span>Local profile</span></div></div><button data-view="settings">Profile & settings</button><button data-view="people">People</button><button id="menuPrivacy">Privacy & terms</button></div>
+
+  <div id="firstVisitModal" class="modal-backdrop hidden"><div class="modal-card intro-modal"><span class="modal-kicker">WELCOME TO FILEDROP</span><h2>One small step before you start.</h2><p>FileDrop keeps your profile local and uses your browser as the place where personalization and history live.</p><div class="consent-list"><label><input id="consentPrivacy" type="checkbox"><span><strong>Privacy notice</strong><small>You understand that shared files are stored on the service until their rules expire or the service storage is reset.</small></span></label><label><input id="consentTerms" type="checkbox"><span><strong>Terms of use</strong><small>You will only share files you have the right to distribute and will not use the service for abuse.</small></span></label><label><input id="consentGuide" type="checkbox"><span><strong>Quick guide</strong><small>You can set expiration, passwords and download limits before generating a link.</small></span></label></div><button id="acceptFirstVisit" class="primary-btn" type="button" disabled><span>Continue to FileDrop</span><b>→</b></button></div></div>
+
+  <div id="updatesModal" class="modal-backdrop hidden"><div class="modal-card update-modal"><div class="update-head"><div><span class="modal-kicker">RELEASE NOTES</span><h2>What changed</h2></div><span class="version-pill">v1 (0.10)</span></div><div class="update-columns"><div><h3>Added</h3><p>Local profiles, People, direct drops, configurable download limits, richer expiry options, local history and security preflight.</p></div><div><h3>Fixed</h3><p>Root routing for Render, simpler project structure and safer temporary storage handling.</p></div><div><h3>Unchanged</h3><p>2 GB upload ceiling, temporary sharing model, password-protected downloads and automatic expiry.</p></div></div><button id="closeUpdates" class="primary-btn" type="button"><span>Continue</span><b>✓</b></button></div></div>
+
+  <div id="dropModal" class="modal-backdrop hidden"><div class="modal-card drop-modal"><div class="modal-kicker">DIRECT DROP</div><h2 id="dropTitle">Send this file?</h2><p id="dropCopy">The recipient will receive a notification and the same share link.</p><div class="drop-review"><div class="file-symbol">FILE</div><div><strong id="dropFileName">—</strong><span id="dropFileRules">—</span></div></div><div class="drop-warning"><strong>Safety first.</strong> FileDrop generates a SHA-256 hash and shows a VirusTotal lookup. A hash lookup is not a fresh antivirus scan unless VirusTotal has already seen the file.</div><div class="modal-actions"><button id="cancelDrop" class="ghost-btn" type="button">Cancel</button><button id="confirmDrop" class="primary-btn" type="button"><span>Drop file</span><b>→</b></button></div></div></div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

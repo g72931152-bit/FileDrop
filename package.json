@@ -1,0 +1,9 @@
+{
+  "name": "filedrop",
+  "version": "0.15.0",
+  "private": true,
+  "description": "FileDrop v1 (0.15) — streaming temporary file sharing with local profiles and controlled delivery.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "check": "node --check server.js && node --check app.js" },
+  "engines": { "node": ">=18" }
+}
